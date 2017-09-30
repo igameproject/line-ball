@@ -11,7 +11,7 @@ const DRAG = -9;
 var ballYV = GRAVITY; //Initially let gravity act
 
 const PIPE_WIDTH = 15;
-var pipeXV = 9 ;
+var pipeXV = 7 ;
 // var pipe_X ;
 
 var pipes = [];
