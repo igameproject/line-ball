@@ -16,7 +16,7 @@ var pipeXV = 9 ;
 
 var pipes = [];
 var score = 0;
-
+var lives;
 var gameOver; //boolean
 
 window.onload = () => {
@@ -26,6 +26,7 @@ window.onload = () => {
   ctx.fillRect(0,0,canvas.width,canvas.height);
   ball_Y = canvas.height/2;
   gameOver = false;
+  lives = 3;
 
 
   document.addEventListener('keydown',function(evt){
@@ -46,12 +47,11 @@ window.onload = () => {
   document.addEventListener('mousedown',function(evt){
    
       if(gameOver == true){
-
+            gameReset();    
             gameOver = false;
-            gameReset();
-
         }
   });
+  
   
   var framesPerSecond = 60;
   setInterval(mainGame,1000/framesPerSecond);
@@ -66,7 +66,7 @@ var mainGame = () => {
   if(!gameOver){
       
       if(outsideBoundaries()){
-        gameOver = true;
+        checkLives();
       };
 
       ball_Y += ballYV; 
@@ -91,8 +91,7 @@ var mainGame = () => {
         elem.pipe_X -= pipeXV;
      
         if (isColliding(elem)){
-            
-              gameOver = true;
+            checkLives();
         }
         
         ctx.fillStyle = "#acacac";
@@ -105,6 +104,7 @@ var mainGame = () => {
       ctx.fillStyle = "black";
       ctx.font="20px Arial";
       ctx.fillText("Score : " + score ,480,30);
+      ctx.fillText("Lives : " + lives ,480,50);
 
   }
 
@@ -126,11 +126,18 @@ var mainGame = () => {
 
 } //main game
 
+var checkLives = () => {
+  lives--;
+  lives > 0 ? gameReset() : gameOver = true;
+}
 
 var gameReset = () => {
   ball_Y = canvas.height/2;
   pipes = [];
-  score = 0;
+  if(gameOver) {
+    score = 0;
+    lives = 3;
+  }
 }
 
 
