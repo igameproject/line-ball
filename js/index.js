@@ -66,7 +66,7 @@ var mainGame = () => {
   if(!gameOver){
       
       if(outsideBoundaries()){
-        isGameOver();
+        checkLives();
       };
 
       ball_Y += ballYV; 
@@ -91,7 +91,7 @@ var mainGame = () => {
         elem.pipe_X -= pipeXV;
      
         if (isColliding(elem)){
-            isGameOver();
+            checkLives();
         }
         
         ctx.fillStyle = "#acacac";
@@ -126,8 +126,9 @@ var mainGame = () => {
 
 } //main game
 
-var isGameOver = () => {
-  lives-- > 0 ? gameReset() : gameOver = true;
+var checkLives = () => {
+  lives--;
+  lives > 0 ? gameReset() : gameOver = true;
 }
 
 var gameReset = () => {
