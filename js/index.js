@@ -4,19 +4,30 @@ var score = 0;
 
 const BALL_X = 50;
 var ball_Y ;
-const BALL_SIZE = 15;
+var BALL_SIZE = 15;
+const BALL_SHRINK = 2;
 
 const GRAVITY = 9 ;
 const DRAG = -9;
 var ballYV = GRAVITY; //Initially let gravity act
 
 const PIPE_WIDTH = 15;
-var pipeXV = 7 ;
+var pipeXV = 6 ;
 // var pipe_X ;
 
+// SCORE MATH
+var numLives = 3;
+var lastCollidedElement;
+
+// POWERUPS 
+var POWERUP_SPAWN_PCT = 0.985;
+const powerup_effects = [ 'FREE_LIFE','SHRINK_BALL']; // can add more powerups as needed
+const powerup_colours = ['#006600', '#660066']; // colour powerups as needed
+
 var pipes = [];
+var powerups = [];
 var score = 0;
-var lives;
+
 var gameOver; //boolean
 
 window.onload = () => {
@@ -26,32 +37,27 @@ window.onload = () => {
   ctx.fillRect(0,0,canvas.width,canvas.height);
   ball_Y = canvas.height/2;
   gameOver = false;
-  lives = 3;
-
+  numLives = 3;
+  lastCollidedElement = {};
 
   document.addEventListener('keydown',function(evt){
       if(evt.code == "Space"){
-
           ballYV = DRAG;
-
       }});
 
   document.addEventListener('keyup',function(evt){
       if(evt.code == "Space"){
-
             ballYV = GRAVITY;
-
         }
   });
 
   document.addEventListener('mousedown',function(evt){
    
       if(gameOver == true){
-            gameReset();    
             gameOver = false;
+            gameReset();
         }
   });
-  
   
   var framesPerSecond = 60;
   setInterval(mainGame,1000/framesPerSecond);
@@ -66,7 +72,7 @@ var mainGame = () => {
   if(!gameOver){
       
       if(outsideBoundaries()){
-        checkLives();
+        gameOver = true;
       };
 
       ball_Y += ballYV; 
@@ -78,123 +84,195 @@ var mainGame = () => {
       ctx.beginPath();
       ctx.arc(BALL_X,ball_Y,BALL_SIZE,0,Math.PI*2);
       ctx.fill();
+      
+      //generate pipes
+      pipes.forEach((elem,index) => {
 
-      pipes.forEach(function(elem,index){
-
-        if(elem.pipe_X < 0){
-
+        if(elem.X < 0){
           //delete the pipe if it moves out of canvas;
           score++;
           pipes.splice(index,1)
+        }
 
+        elem.X -= pipeXV;
+
+        if (isPipeColliding(elem) && lastCollidedElement !== elem){
+          // get reference to the element we're colliding with and only subtract a life it we haven't hit it before 
+          // (this removes the 'instakill' from when the counter decreases per frame as you're colliding with the bar)
+          lastCollidedElement = elem;
+          // if we have a life remaining, we'll decrease by 1. if that was our last life, we're dead.
+          if (numLives > 1){
+            takeDamage();
+          }else{
+            gameOver = true;
+          }
         }
-        elem.pipe_X -= pipeXV;
-     
-        if (isColliding(elem)){
-            checkLives();
-        }
-        
+
         ctx.fillStyle = "#acacac";
-        ctx.fillRect(elem.pipe_X , elem.pipe_Y, PIPE_WIDTH, elem.pipeHeight);
-        
-      
+        ctx.fillRect(elem.X , elem.Y, PIPE_WIDTH, elem.height);
 
       });
 
-      ctx.fillStyle = "black";
-      ctx.font="20px Arial";
-      ctx.fillText("Score : " + score ,480,30);
-      ctx.fillText("Lives : " + lives ,480,50);
+      // generate powerups
+      if (Math.random() > POWERUP_SPAWN_PCT ){
+        generatePowerup();
+      }
+      
+      // draw powerups
+      powerups.forEach((elem, index) => {
+        if (elem.X < (0 - elem.width ))
+          // remove powerup off screen
+          powerups.splice(index, 1);
 
+        // apply velocity
+        elem.X -= pipeXV;
+        
+        // Collision with player has some effect
+        if (isPickupColliding(elem)){
+          switch(elem.effect){
+            case 'FREE_LIFE':
+            // we can simply increase the number of lives
+              numLives++;
+            break;
+            case 'SHRINK_BALL':
+              // shrink ball size by 1 pix
+              if (BALL_SIZE > 5){
+                BALL_SIZE -= BALL_SHRINK;
+              }
+            break;
+          }
+          // remove after contact
+          powerups.splice(index, 1);
+        }
+
+        // draw powerup
+        ctx.fillStyle = elem.color;
+        ctx.fillRect(elem.X , elem.Y, elem.width, elem.height);
+      });
+
+      showStats();
+  } else {
+      showDeathScreen();
   }
-
-  else{
-
-      ctx.fillStyle = "salmon";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle = "black";
-      ctx.font="60px Arial";
-      ctx.fillText("GAME OVER",112,150);
-      ctx.font="30px Arial";
-      ctx.fillText("Final Score : " + score , canvas.width/2 - 100,200);
-      ctx.fillStyle = "#474747";
-      ctx.font="20px Arial";
-      ctx.fillText("Click to Play ", canvas.width/2  - 60,250);
-
-
-  }
-
 } //main game
 
-var checkLives = () => {
-  lives--;
-  lives > 0 ? gameReset() : gameOver = true;
+
+var showStats = () => {
+  ctx.fillStyle = "black";
+  ctx.font="20px Arial";
+  ctx.fillText("Score : " + score , 480,30);
+  // let's show our remaining lives
+  ctx.fillText("Lives : " + numLives , 0,30);
+  ctx.fillText("Width : " + BALL_SIZE , 95,30);
+}
+
+var showDeathScreen = () =>
+{
+  ctx.fillStyle = "salmon";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = "black";
+  ctx.font="60px Arial";
+  ctx.fillText("GAME OVER",112,150);
+  ctx.font="30px Arial";
+  ctx.fillText("Final Score : " + score , canvas.width/2 - 100,200);
+  ctx.fillStyle = "#474747";
+  ctx.font="20px Arial";
+  ctx.fillText("Click to Play ", canvas.width/2  - 60,250);
+}
+
+var takeDamage = () => 
+{
+  numLives -= 1;
+  // lets flash the screen red on hit to show taking damage
+  ctx.fillStyle = "red";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 }
 
 var gameReset = () => {
   ball_Y = canvas.height/2;
   pipes = [];
-  if(gameOver) {
-    score = 0;
-    lives = 3;
-  }
+  powerups = [];
+  numLives = 3;
+  score = 0;
+  BALL_SIZE = 15;
+  lastCollidedElement = {};
 }
-
-
 
 var outsideBoundaries = () => {
-
   return ball_Y < 0 || ball_Y > canvas.height;
-
 }
 
+var generatePowerup = () => {
+
+  var powerup = {
+    height :25,
+    width :25,
+    X : canvas.width,
+    Y : canvas.height,
+    origin : 0,
+    effect : '',
+    color:''
+  };
+
+  powerup.Y = Math.floor(Math.random()*(canvas.height - BALL_SIZE * 3));
+  var ind = Math.floor(Math.random()*powerup_effects.length);
+  powerup.effect = powerup_effects[ind];
+  powerup.color = powerup_colours[ind];
+
+  powerups.push(powerup);
+}
+
+// pickup collision check (without 'origin' logic for pipe)
+var isPickupColliding  = (elem) => {
+  if(elem.X <= BALL_X + BALL_SIZE && elem.X >= BALL_X - BALL_SIZE){
+    if(elem.height > ball_Y){
+      return true;
+    }
+    else if(elem.Y < ball_Y){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+}
 
 var generatePipes = () => {
 
-
   var pipe =  {
-    pipeHeight : 0,
-    pipe_X : canvas.width,
-    pipe_Y: canvas.height,
-    pipeOrigin : 0
-
+    height : 0,
+    X : canvas.width,
+    Y : canvas.height,
+    origin : 0
   };
 
+  pipe.height = Math.floor(Math.random()*(canvas.height - BALL_SIZE * 3));
 
-  pipe.pipeHeight = Math.floor(Math.random()*(canvas.height - BALL_SIZE*4));
-
-  pipe.pipeOrigin = Math.floor(Math.random()*2);
+  pipe.origin = Math.floor(Math.random()*2);
   //0 -> means top ; 1 -> means bottom
-  if(pipe.pipeOrigin == 0){
-    pipe.pipe_Y = 0;
-
+  if(pipe.origin == 0){
+    pipe.Y = 0;
   }
   else{
-      pipe.pipe_Y = canvas.height - pipe.pipeHeight 
+      pipe.Y = canvas.height - pipe.height 
   }
-
   pipes.push(pipe);
-
 }
 
 
-
-var isColliding  = (pipe) => {
- 
-  if(pipe.pipe_X <= BALL_X + BALL_SIZE && pipe.pipe_X >= BALL_X - BALL_SIZE){
-      if(pipe.pipeOrigin == 0  && pipe.pipeHeight > ball_Y){
-        return true;
-      }
-      else if(pipe.pipeOrigin == 1  && pipe.pipe_Y < ball_Y){
-        return true;
-      }
-      else{
-        return false;
-      }
-
-  }
-
-
+var isPipeColliding = (pipe) => {    
+     if(pipe.X <= BALL_X + BALL_SIZE && pipe.X >= BALL_X - BALL_SIZE){
+         if(pipe.origin == 0  && pipe.height > ball_Y){
+           return true;
+         }
+         else if(pipe.origin == 1  && pipe.Y < ball_Y){
+           return true;
+         }
+         else{
+           return false;
+         }
+   
+     }
 }
 
 
