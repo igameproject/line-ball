@@ -5,6 +5,7 @@ var score = 0;
 const BALL_X = 50;
 var ball_Y ;
 const BALL_SIZE = 15;
+const BALL_SPEED = 0.7;
 
 const GRAVITY = 9 ;
 const DRAG = -9;
@@ -64,16 +65,16 @@ window.onload = () => {
 var mainGame = () => {
 
   if(!gameOver){
-      
+
       if(outsideBoundaries()){
         gameOver = true;
       };
 
-      ball_Y += ballYV; 
+      ball_Y += ballYV * BALL_SPEED;
 
       ctx.fillStyle = "white";
       ctx.fillRect(0,0,canvas.width,canvas.height);
-      
+
       ctx.fillStyle = "salmon"
       ctx.beginPath();
       ctx.arc(BALL_X,ball_Y,BALL_SIZE,0,Math.PI*2);
