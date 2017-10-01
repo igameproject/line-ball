@@ -160,8 +160,7 @@ var generatePipes = () => {
 
   };
 
-
-  pipe.pipeHeight = Math.floor(Math.random()*(canvas.height - BALL_SIZE*4));
+  pipe.pipeHeight = Math.floor(Math.random()*(canvas.height - BALL_SIZE*3)-10);
 
   pipe.pipeOrigin = Math.floor(Math.random()*2);
   //0 -> means top ; 1 -> means bottom
