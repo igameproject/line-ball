@@ -63,6 +63,10 @@ window.onload = () => {
   setInterval(mainGame,1000/framesPerSecond);
   var pipeGeneratePerSecond = 2;
   setInterval(generatePipes,1000/pipeGeneratePerSecond);
+  var powerupGeneratePerSecond = 0.5;
+  setInterval(generatePowerup,1000/powerupGeneratePerSecond);
+    // TODO: update deployment method here
+
 
 }; //initializing function
 
@@ -85,7 +89,6 @@ var mainGame = () => {
       ctx.arc(BALL_X,ball_Y,BALL_SIZE,0,Math.PI*2);
       ctx.fill();
       
-      //generate pipes
       pipes.forEach((elem,index) => {
 
         if(elem.X < 0){
@@ -113,11 +116,6 @@ var mainGame = () => {
 
       });
 
-      // generate powerups
-      if (Math.random() > POWERUP_SPAWN_PCT ){
-        generatePowerup();
-      }
-      
       // draw powerups
       powerups.forEach((elem, index) => {
         if (elem.X < (0 - elem.width ))
@@ -128,7 +126,7 @@ var mainGame = () => {
         elem.X -= pipeXV;
         
         // Collision with player has some effect
-        if (isPickupColliding(elem)){
+        if (isPowerupColliding(elem)){
           switch(elem.effect){
             case 'FREE_LIFE':
             // we can simply increase the number of lives
@@ -223,7 +221,7 @@ var generatePowerup = () => {
 }
 
 // pickup collision check (without 'origin' logic for pipe)
-var isPickupColliding  = (elem) => {
+var isPowerupColliding  = (elem) => {
   if(elem.X <= BALL_X + BALL_SIZE && elem.X >= BALL_X - BALL_SIZE){
     if(elem.height > ball_Y){
       return true;
@@ -238,7 +236,7 @@ var isPickupColliding  = (elem) => {
 }
 
 var generatePipes = () => {
-
+  
   var pipe =  {
     height : 0,
     X : canvas.width,
@@ -247,8 +245,8 @@ var generatePipes = () => {
   };
 
 
-  pipe.pipeHeight = Math.floor(Math.random()*(canvas.height - BALL_SIZE*3)-10);
-  pipe.pipeOrigin = Math.floor(Math.random()*2);
+  pipe.height = Math.floor(Math.random()*(canvas.height - BALL_SIZE*3)-10);
+  pipe.origin = Math.floor(Math.random()*2);
 
   //0 -> means top ; 1 -> means bottom
   if(pipe.origin == 0){
@@ -262,18 +260,19 @@ var generatePipes = () => {
 
 
 var isPipeColliding = (pipe) => {    
-     if(pipe.X <= BALL_X + BALL_SIZE && pipe.X >= BALL_X - BALL_SIZE){
-         if(pipe.origin == 0  && pipe.height > ball_Y){
-           return true;
-         }
-         else if(pipe.origin == 1  && pipe.Y < ball_Y){
-           return true;
-         }
-         else{
-           return false;
-         }
-   
-     }
+  if(pipe.pipe_X <= BALL_X + BALL_SIZE && pipe.pipe_X >= BALL_X - BALL_SIZE){
+    if(pipe.pipeOrigin == 0  && pipe.pipeHeight > ball_Y){
+      return true;
+    }
+    else if(pipe.pipeOrigin == 1  && pipe.pipe_Y < ball_Y){
+      return true;
+    }
+    else{
+      return false;
+    }
+
+}
+
 }
 
 
