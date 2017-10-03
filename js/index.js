@@ -61,12 +61,12 @@ window.onload = () => {
   
   var framesPerSecond = 60;
   setInterval(mainGame,1000/framesPerSecond);
+
   var pipeGeneratePerSecond = 2;
   setInterval(generatePipes,1000/pipeGeneratePerSecond);
+
   var powerupGeneratePerSecond = 0.55;
   setInterval(generatePowerup,1000/powerupGeneratePerSecond);
-    // TODO: update deployment method here
-
 
 }; //initializing function
 
@@ -168,6 +168,7 @@ var showStats = () => {
   // let's show our remaining lives
   ctx.fillText("Lives : " + numLives , 0,30);
   ctx.fillText("Width : " + BALL_SIZE , 95,30);
+  ctx.fillText("Speed : " + pipeXV , 250,30);
 }
 
 var showDeathScreen = () =>
@@ -186,7 +187,13 @@ var showDeathScreen = () =>
 
 var takeDamage = () => 
 {
+  // reduce number of lives
   numLives -= 1;
+
+  // we could remove the powerups and set the ball params back to their defaults:
+  BALL_SIZE = 15;
+  pipeXV = 6;
+
   // lets flash the screen red on hit to show taking damage
   ctx.fillStyle = "red";
   ctx.fillRect(0,0,canvas.width,canvas.height);
