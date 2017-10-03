@@ -105,7 +105,6 @@ var mainGame = () => {
           lastCollidedElement = elem;
           // if we have a life remaining, we'll decrease by 1. if that was our last life, we're dead.
           if (numLives > 1){
-            console.log("shit");
             takeDamage();
           }else{
             gameOver = true;
@@ -187,7 +186,6 @@ var showDeathScreen = () =>
 
 var takeDamage = () => 
 {
-  console.log("fuick");
   numLives -= 1;
   // lets flash the screen red on hit to show taking damage
   ctx.fillStyle = "red";
