@@ -80,15 +80,17 @@ var mainGame = () => {
       };
 
       ball_Y += ballYV; 
-
+      // draw background
       ctx.fillStyle = "white";
       ctx.fillRect(0,0,canvas.width,canvas.height);
       
+      // draw ball
       ctx.fillStyle = "salmon"
       ctx.beginPath();
       ctx.arc(BALL_X,ball_Y,BALL_SIZE,0,Math.PI*2);
       ctx.fill();
       
+      // pipe logic 
       pipes.forEach((elem,index) => {
 
         if(elem.X < 0){
@@ -97,6 +99,7 @@ var mainGame = () => {
           pipes.splice(index,1)
         }
 
+        // move the pipe
         elem.X -= pipeXV;
 
         if (isPipeColliding(elem) && lastCollidedElement !== elem){
@@ -111,6 +114,7 @@ var mainGame = () => {
           }
         }
 
+        //draw the pipe
         ctx.fillStyle = "#acacac";
         ctx.fillRect(elem.X , elem.Y, PIPE_WIDTH, elem.height);
 
@@ -118,15 +122,18 @@ var mainGame = () => {
 
       // draw powerups
       powerups.forEach((elem, index) => {
-        if (elem.X < (0 - elem.width ))
+        if (elem.X < (0 - elem.width )){
           // remove powerup off screen
           powerups.splice(index, 1);
+        }
 
         // apply velocity
         elem.X -= pipeXV;
         
         // Collision with player has some effect
         if (isPowerupColliding(elem)){
+          
+          // TODO we can move this out into its own function later
           switch(elem.effect){
             case 'FREE_LIFE':
             // we can simply increase the number of lives
@@ -159,7 +166,6 @@ var mainGame = () => {
       showDeathScreen();
   }
 } //main game
-
 
 var showStats = () => {
   ctx.fillStyle = "black";
@@ -257,7 +263,6 @@ var generatePipes = () => {
     origin : 0
   };
 
-
   pipe.height = Math.floor(Math.random()*(canvas.height - BALL_SIZE*3)-10);
   pipe.origin = Math.floor(Math.random()*2);
 
@@ -283,9 +288,7 @@ var isPipeColliding = (pipe) => {
     else{
       return false;
     }
-
-}
-
+  }
 }
 
 
