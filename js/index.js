@@ -13,6 +13,7 @@ var ballYV = GRAVITY; //Initially let gravity act
 
 const PIPE_WIDTH = 15;
 var pipeXV = 6 ;
+const XV_SHRINK = 0.5;
 // var pipe_X ;
 
 // SCORE MATH
@@ -20,9 +21,8 @@ var numLives = 3;
 var lastCollidedElement;
 
 // POWERUPS 
-var POWERUP_SPAWN_PCT = 0.985;
-const powerup_effects = [ 'FREE_LIFE','SHRINK_BALL']; // can add more powerups as needed
-const powerup_colours = ['#006600', '#660066']; // colour powerups as needed
+const powerup_effects = [ 'FREE_LIFE','SHRINK_BALL','SLOW_DOWN']; // can add more powerups as needed
+const powerup_colours = ['#006600', '#660066', "#995511"]; // colour powerups as needed
 
 var pipes = [];
 var powerups = [];
@@ -63,7 +63,7 @@ window.onload = () => {
   setInterval(mainGame,1000/framesPerSecond);
   var pipeGeneratePerSecond = 2;
   setInterval(generatePipes,1000/pipeGeneratePerSecond);
-  var powerupGeneratePerSecond = 0.5;
+  var powerupGeneratePerSecond = 0.55;
   setInterval(generatePowerup,1000/powerupGeneratePerSecond);
     // TODO: update deployment method here
 
@@ -105,6 +105,7 @@ var mainGame = () => {
           lastCollidedElement = elem;
           // if we have a life remaining, we'll decrease by 1. if that was our last life, we're dead.
           if (numLives > 1){
+            console.log("shit");
             takeDamage();
           }else{
             gameOver = true;
@@ -133,11 +134,17 @@ var mainGame = () => {
               numLives++;
             break;
             case 'SHRINK_BALL':
-              // shrink ball size by 1 pix
+              // shrink ball size by BALL_SHRINK pix
               if (BALL_SIZE > 5){
                 BALL_SIZE -= BALL_SHRINK;
               }
             break;
+            case 'SLOW_DOWN':
+            // Slow ball down by XV_SHRINK amount
+            if (pipeXV > 2){
+              pipeXV -= XV_SHRINK;
+            }
+          break;
           }
           // remove after contact
           powerups.splice(index, 1);
@@ -180,6 +187,7 @@ var showDeathScreen = () =>
 
 var takeDamage = () => 
 {
+  console.log("fuick");
   numLives -= 1;
   // lets flash the screen red on hit to show taking damage
   ctx.fillStyle = "red";
@@ -260,11 +268,11 @@ var generatePipes = () => {
 
 
 var isPipeColliding = (pipe) => {    
-  if(pipe.pipe_X <= BALL_X + BALL_SIZE && pipe.pipe_X >= BALL_X - BALL_SIZE){
-    if(pipe.pipeOrigin == 0  && pipe.pipeHeight > ball_Y){
+  if(pipe.X <= BALL_X + BALL_SIZE && pipe.X >= BALL_X - BALL_SIZE){
+    if(pipe.origin == 0  && pipe.height > ball_Y){
       return true;
     }
-    else if(pipe.pipeOrigin == 1  && pipe.pipe_Y < ball_Y){
+    else if(pipe.origin == 1  && pipe.Y < ball_Y){
       return true;
     }
     else{
