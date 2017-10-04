@@ -18,6 +18,7 @@ var pipes = [];
 var score = 0;
 var lives;
 var gameOver; //boolean
+var paused;
 
 window.onload = () => {
   canvas = document.getElementById("mainGame");
@@ -26,6 +27,7 @@ window.onload = () => {
   ctx.fillRect(0,0,canvas.width,canvas.height);
   ball_Y = canvas.height/2;
   gameOver = false;
+  paused = true;
   lives = 3;
 
 
@@ -33,6 +35,7 @@ window.onload = () => {
       if(evt.code == "Space"){
 
           ballYV = DRAG;
+          paused = false;
 
       }});
 
@@ -69,7 +72,9 @@ var mainGame = () => {
         checkLives();
       };
 
-      ball_Y += ballYV; 
+      if (!paused) {
+        ball_Y += ballYV;
+      }
 
       ctx.fillStyle = "white";
       ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -88,12 +93,15 @@ var mainGame = () => {
           pipes.splice(index,1)
 
         }
-        elem.pipe_X -= pipeXV;
-     
-        if (isColliding(elem)){
+
+        if (!paused) {
+          elem.pipe_X -= pipeXV;
+
+          if (isColliding(elem)){
             checkLives();
+          }
         }
-        
+
         ctx.fillStyle = "#acacac";
         ctx.fillRect(elem.pipe_X , elem.pipe_Y, PIPE_WIDTH, elem.pipeHeight);
         
@@ -105,6 +113,11 @@ var mainGame = () => {
       ctx.font="20px Arial";
       ctx.fillText("Score : " + score ,480,30);
       ctx.fillText("Lives : " + lives ,480,50);
+
+      if (paused) {
+          ctx.font="30pt Arial";
+          ctx.fillText("Press Space to Start", canvas.width/2 - 180, 150)
+      }
 
   }
 
@@ -134,6 +147,7 @@ var checkLives = () => {
 var gameReset = () => {
   ball_Y = canvas.height/2;
   pipes = [];
+  paused = true;
   if(gameOver) {
     score = 0;
     lives = 3;
