@@ -121,12 +121,12 @@ var mainGame = () => {
       ctx.fillRect(0,0,canvas.width,canvas.height);
       ctx.fillStyle = "black";
       ctx.font="60px Arial";
-      ctx.fillText("GAME OVER",canvas.width/2 - ctx.measureText("GAME OVER").width/2,150);
+      ctx.fillText("GAME OVER",canvas.width/2 - ctx.measureText("GAME OVER").width/2, canvas.height/2 - 50);
       ctx.font="30px Arial";
-      ctx.fillText("Final Score : " + score , canvas.width/2 - 100,200);
+      ctx.fillText("Final Score : " + score , canvas.width/2 - 100, canvas.height/2);
       ctx.fillStyle = "#474747";
       ctx.font="20px Arial";
-      ctx.fillText("Click to Play ", canvas.width/2  - 60,250);
+      ctx.fillText("Click to Play ", canvas.width/2  - 60, canvas.height/2 + 50);
 
 
   }
