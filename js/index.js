@@ -6,8 +6,9 @@ const BALL_X = 50;
 var ball_Y ;
 const BALL_SIZE = 15;
 
-const GRAVITY = 9 ;
-const DRAG = -9;
+const GRAVITY = Math.round(document.documentElement.clientHeight/56);
+alert(GRAVITY);
+const DRAG = GRAVITY*-1;//So that you're dragged up to the same degree that you're pulled down.
 var ballYV = GRAVITY; //Initially let gravity act
 
 const PIPE_WIDTH = 15;
@@ -105,8 +106,12 @@ var mainGame = () => {
 
       ctx.fillStyle = "black";
       ctx.font="20px Arial";
-      ctx.fillText("Score : " + score ,480,30);
-      ctx.fillText("Lives : " + lives ,480,50);
+
+      var scoreText = "Score : " + score;
+      var livesText = "Lives : " + lives;
+
+      ctx.fillText(scoreText, canvas.width - ctx.measureText(scoreText).width - 10,30);
+      ctx.fillText(livesText, canvas.width - ctx.measureText(livesText).width - 10,50);
 
   }
 
@@ -116,7 +121,7 @@ var mainGame = () => {
       ctx.fillRect(0,0,canvas.width,canvas.height);
       ctx.fillStyle = "black";
       ctx.font="60px Arial";
-      ctx.fillText("GAME OVER",112,150);
+      ctx.fillText("GAME OVER",canvas.width/2 - ctx.measureText("GAME OVER").width/2,150);
       ctx.font="30px Arial";
       ctx.fillText("Final Score : " + score , canvas.width/2 - 100,200);
       ctx.fillStyle = "#474747";
@@ -162,7 +167,7 @@ var generatePipes = () => {
 
   };
 
-  pipe.pipeHeight = Math.floor(Math.random()*(canvas.height - BALL_SIZE*3)-10);
+  pipe.pipeHeight = Math.floor(Math.random()*(canvas.height/6)-10)+canvas.height/2;
 
   pipe.pipeOrigin = Math.floor(Math.random()*2);
   //0 -> means top ; 1 -> means bottom
