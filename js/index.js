@@ -21,6 +21,8 @@ var gameOver; //boolean
 
 window.onload = () => {
   canvas = document.getElementById("mainGame");
+  canvas.height = document.documentElement.clientHeight;
+  canvas.width = document.documentElement.clientWidth;
   ctx = canvas.getContext('2d'); 
   ctx.fillStyle = "white";
   ctx.fillRect(0,0,canvas.width,canvas.height);
