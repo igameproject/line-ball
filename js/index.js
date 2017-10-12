@@ -102,19 +102,20 @@ var mainGame = () => {
 
       pipes.forEach(function(elem,index){
 
+        elem.pipe_X -= pipeXV;
+
         ctx.fillStyle = "#acacac";
         ctx.fillRect(elem.pipe_X , elem.pipe_Y, PIPE_WIDTH, elem.pipeHeight);
+     
+        if(isColliding(elem))checkLives();
 
         if(elem.pipe_X < 0){
 
           //delete the pipe if it moves out of canvas;
           score++;
-          pipes.splice(index,1)
+          pipes.splice(index,1);
 
         }
-        elem.pipe_X -= pipeXV;
-     
-        if (isColliding(elem))checkLives();
 
       });
 
@@ -222,7 +223,7 @@ var generatePipes = () => {
       pipe.pipe_Y = canvas.height - pipe.pipeHeight 
   }
 
-  pipes.push(pipe);
+  pipes.unshift(pipe);
 
 }
 
