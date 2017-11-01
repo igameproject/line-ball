@@ -131,7 +131,6 @@ var mainGame = () => {
         difficulty = (difficulty > difficultyMin) ? difficulty - difficultyDecreaseRate : difficulty;
         YVChangeRate = 1 + 1 * (1000-difficulty)/100;
         maxVelocity = document.documentElement.clientHeight/(difficulty/10);
-        console.log(maxVelocity);
         //The above line of code decreases difficulty if it's above 200.
       }
 
