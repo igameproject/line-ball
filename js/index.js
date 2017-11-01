@@ -6,15 +6,15 @@ const BALL_X = 50;
 var ball_Y ;
 const BALL_SIZE = 15;
 
-const GRAVITY = Math.round(document.documentElement.clientHeight/56);
-const DRAG = GRAVITY*-1;//So that you're dragged up to the same degree that you're pulled down.
-var ballYV = GRAVITY; //Initially let gravity act
+var maxVelocity = Math.round(document.documentElement.clientHeight/60);
+var ballYV = 0; //Initially let gravity act
+var YVChangeRate = 1;
 
 const PIPE_WIDTH = 15;
 var pipeXV = 7 ;
 var difficulty = 1000;//var not const because it will decrease as the game goes on :)
-const difficultyMin = 400;
-const difficultyDecreaseRate = 30;
+const difficultyMin = 500;
+const difficultyDecreaseRate = 10;
 var nextPipeTime = Date.now() + difficulty;
 
 // var pipe_X ;
@@ -26,6 +26,7 @@ var gameOver; //boolean
 var gameOverScreen = false;//boolean
 //The above variable exists to stop the gameover screen being cast several times successively.
 //Before, this wasn't noticeable, but when I animated it it became so.
+var spacePressed = false;
 
 
 
@@ -41,12 +42,12 @@ window.onload = () => {
   ball_Y = canvas.height/2;
   gameOver = false;
   lives = 3;
-
+  spacePressed = false;
 
   document.addEventListener('keydown', function(evt){
       if(evt.code == "Space"){
 
-          ballYV = DRAG;
+          spacePressed = true;
 
       }
   });
@@ -61,7 +62,7 @@ window.onload = () => {
   document.addEventListener('keyup', function(evt){
       if(evt.code == "Space"){
 
-            ballYV = GRAVITY;
+            spacePressed = false;
 
         }
   });
@@ -89,6 +90,10 @@ var mainGame = () => {
       if(outsideBoundaries()){
         checkLives();
       };
+
+      if(spacePressed)ballYV = (ballYV - YVChangeRate > -1*maxVelocity) ? ballYV - YVChangeRate : maxVelocity*-1;
+
+      else if(!spacePressed)ballYV = (ballYV + YVChangeRate < maxVelocity) ? ballYV + YVChangeRate : maxVelocity;
 
       ball_Y += ballYV; 
 
@@ -124,6 +129,9 @@ var mainGame = () => {
         generatePipes();
         nextPipeTime = Date.now() + difficulty;
         difficulty = (difficulty > difficultyMin) ? difficulty - difficultyDecreaseRate : difficulty;
+        YVChangeRate = 1 + 1 * (1000-difficulty)/100;
+        maxVelocity = document.documentElement.clientHeight/(difficulty/10);
+        console.log(maxVelocity);
         //The above line of code decreases difficulty if it's above 200.
       }
 
