@@ -27,6 +27,7 @@ var gameOverScreen = false;//boolean
 //The above variable exists to stop the gameover screen being cast several times successively.
 //Before, this wasn't noticeable, but when I animated it it became so.
 var spacePressed = false;
+var gameStart = false;
 
 
 
@@ -48,6 +49,9 @@ window.onload = () => {
       if(evt.code == "Space"){
 
           spacePressed = true;
+          if(!gameStart){
+          	gameStart = true;
+          }
 
       }
   });
@@ -86,64 +90,87 @@ window.onload = () => {
 var mainGame = () => {
 
   if(!gameOver){
+
+  	  if(gameStart){
+
+  	  	 if(outsideBoundaries()){
+	        checkLives();
+	      };
+
+	      if(spacePressed)ballYV = (ballYV - YVChangeRate > -1*maxVelocity) ? ballYV - YVChangeRate : maxVelocity*-1;
+
+	      else if(!spacePressed)ballYV = (ballYV + YVChangeRate < maxVelocity) ? ballYV + YVChangeRate : maxVelocity;
+
+	      ball_Y += ballYV; 
+
+	      ctx.fillStyle = "white";
+	      ctx.fillRect(0,0,canvas.width,canvas.height);
+	      
+	      ctx.fillStyle = "salmon"
+	      ctx.beginPath();
+	      ctx.arc(BALL_X,ball_Y,BALL_SIZE,0,Math.PI*2);
+	      ctx.fill();
+
+	      pipes.forEach(function(elem,index){
+
+	        elem.pipe_X -= pipeXV;
+
+	        ctx.fillStyle = "#acacac";
+	        ctx.fillRect(elem.pipe_X , elem.pipe_Y, PIPE_WIDTH, elem.pipeHeight);
+	     
+	        if(isColliding(elem))checkLives();
+
+	        if(elem.pipe_X < 0){
+
+	          //delete the pipe if it moves out of canvas;
+	          score++;
+	          pipes.splice(index,1);
+
+	        }
+
+	      });
+
+
+	      if(Date.now() > nextPipeTime){
+	        generatePipes();
+	        nextPipeTime = Date.now() + difficulty;
+	        difficulty = (difficulty > difficultyMin) ? difficulty - difficultyDecreaseRate : difficulty;
+	        YVChangeRate = 1 + 1 * (1000-difficulty)/100;
+	        maxVelocity = document.documentElement.clientHeight/(difficulty/10);
+	        //The above line of code decreases difficulty if it's above 200.
+	      }
+
+	      ctx.fillStyle = "black";
+	      ctx.font="20px Arial";
+
+	      var scoreText = "Score : " + score;
+	      var livesText = "Lives : " + lives;
+	      var difficultyText = "Difficulty: " + (1000 - difficulty);
+
+	      ctx.fillText(scoreText, canvas.width - ctx.measureText(scoreText).width - 10,30);
+	      ctx.fillText(livesText, canvas.width - ctx.measureText(livesText).width - 10,50);
+	      // ctx.fillText(difficultyText, canvas.width - ctx.measureText(difficultyText).width - 10,70);
+
+  	 	}
+
+  	 	else {
+
+
+	        ctx.globalAlpha = 0.05
+
+	        ctx.fillStyle = "cyan";
+	        ctx.fillRect(0,0,canvas.width,canvas.height);
+	        ctx.globalAlpha = 1;
+	        ctx.fillStyle = "black";
+	        ctx.font="60px Arial";
+	        ctx.fillText("Line Ball",canvas.width/2 - ctx.measureText("Line Ball").width/2, canvas.height/2 - 50);
+	        ctx.fillStyle = "grey"
+	        ctx.font="30px Arial";
+        	ctx.fillText("Press Spacebar to start" , canvas.width/2 - ctx.measureText("Press Spacebar to start").width/2, canvas.height/2);
+
+  	 	}
       
-      if(outsideBoundaries()){
-        checkLives();
-      };
-
-      if(spacePressed)ballYV = (ballYV - YVChangeRate > -1*maxVelocity) ? ballYV - YVChangeRate : maxVelocity*-1;
-
-      else if(!spacePressed)ballYV = (ballYV + YVChangeRate < maxVelocity) ? ballYV + YVChangeRate : maxVelocity;
-
-      ball_Y += ballYV; 
-
-      ctx.fillStyle = "white";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      
-      ctx.fillStyle = "salmon"
-      ctx.beginPath();
-      ctx.arc(BALL_X,ball_Y,BALL_SIZE,0,Math.PI*2);
-      ctx.fill();
-
-      pipes.forEach(function(elem,index){
-
-        elem.pipe_X -= pipeXV;
-
-        ctx.fillStyle = "#acacac";
-        ctx.fillRect(elem.pipe_X , elem.pipe_Y, PIPE_WIDTH, elem.pipeHeight);
      
-        if(isColliding(elem))checkLives();
-
-        if(elem.pipe_X < 0){
-
-          //delete the pipe if it moves out of canvas;
-          score++;
-          pipes.splice(index,1);
-
-        }
-
-      });
-
-
-      if(Date.now() > nextPipeTime){
-        generatePipes();
-        nextPipeTime = Date.now() + difficulty;
-        difficulty = (difficulty > difficultyMin) ? difficulty - difficultyDecreaseRate : difficulty;
-        YVChangeRate = 1 + 1 * (1000-difficulty)/100;
-        maxVelocity = document.documentElement.clientHeight/(difficulty/10);
-        //The above line of code decreases difficulty if it's above 200.
-      }
-
-      ctx.fillStyle = "black";
-      ctx.font="20px Arial";
-
-      var scoreText = "Score : " + score;
-      var livesText = "Lives : " + lives;
-      var difficultyText = "Difficulty: " + (1000 - difficulty);
-
-      ctx.fillText(scoreText, canvas.width - ctx.measureText(scoreText).width - 10,30);
-      ctx.fillText(livesText, canvas.width - ctx.measureText(livesText).width - 10,50);
-      ctx.fillText(difficultyText, canvas.width - ctx.measureText(difficultyText).width - 10,70);
 
   }
 
